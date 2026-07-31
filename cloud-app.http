@@ -1,0 +1,35 @@
+@cloud_app_HostAddress = http://localhost:5299
+
+GET {{cloud_app_HostAddress}}/books/
+Accept: application/json
+###
+
+@id=69240a01394930509f5fdb01
+GET {{cloud_app_HostAddress}}/books/{{id}}
+Accept: application/json
+###
+
+POST {{cloud_app_HostAddress}}/books
+Content-Type: application/json
+
+{
+  "bookName": "The Pragmatic Programmer",
+  "Price": 49.99,
+  "Category": "Computers",
+  "Author": "Santanu Bhunia"
+}
+ 
+###
+@putid=69242275c5086cd44789f375
+PUT {{cloud_app_HostAddress}}/books/{{putid}}
+Content-Type: application/json
+
+{
+  "bookName": "OOPS Concepts",
+  "Price": 45.00,
+  "Category": "Computers",
+  "Author": "Santanu Bhunia"
+}
+###
+@deleteid=692423e4fc1ab2a1256c00a2
+DELETE {{cloud_app_HostAddress}}/Books/{{deleteid}}
