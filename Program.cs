@@ -17,6 +17,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.MapGet("/", () => "Hello World!");
+
 app.RegisterEndpoints();
 
 app.Run();
