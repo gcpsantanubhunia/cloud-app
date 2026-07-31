@@ -1,10 +1,14 @@
 @cloud_app_HostAddress = http://localhost:5299
 
+###
+GET {{cloud_app_HostAddress}}/
+Accept: application/json
+###
 GET {{cloud_app_HostAddress}}/books/
 Accept: application/json
 ###
 
-@id=69240a01394930509f5fdb01
+@id=1
 GET {{cloud_app_HostAddress}}/books/{{id}}
 Accept: application/json
 ###
@@ -20,7 +24,7 @@ Content-Type: application/json
 }
  
 ###
-@putid=69242275c5086cd44789f375
+@putid=1
 PUT {{cloud_app_HostAddress}}/books/{{putid}}
 Content-Type: application/json
 
@@ -31,5 +35,5 @@ Content-Type: application/json
   "Author": "Santanu Bhunia"
 }
 ###
-@deleteid=692423e4fc1ab2a1256c00a2
+@deleteid=1
 DELETE {{cloud_app_HostAddress}}/Books/{{deleteid}}
