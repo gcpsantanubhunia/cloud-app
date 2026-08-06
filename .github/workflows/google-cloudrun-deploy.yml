@@ -27,16 +27,25 @@ jobs:
           workload_identity_provider: "projects/655013047629/locations/global/workloadIdentityPools/githubpool/providers/githubprovider"
           service_account: "github-actions-sa@gcp-cloudrun-gke.iam.gserviceaccount.com"
 
-      # Now you can use gcloud, gsutil, etc.
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
+      - id: 'deploy'
+        uses: 'google-github-actions/deploy-cloudrun@v3'
+        with:
+          service: 'hello-cloud-run'
+          image: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
 
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy my-service \
-            --source . \
-            --region us-central1 \
-            --project gcp-cloudrun-gke
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
+
+      # Now you can use gcloud, gsutil, etc.
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v3
+
+      # - name: Deploy to Cloud Run
+      #   run: |
+      #     gcloud run deploy my-service \
+      #       --source . \
+      #       --region us-central1 \
+      #       --project gcp-cloudrun-gke
 
 # name: Deploy to GCP
 
