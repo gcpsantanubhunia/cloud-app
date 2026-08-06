@@ -1,56 +1,43 @@
-name: Deploy to Cloud Run
+name: Deploy to GCP
 
 on:
   push:
     branches:
-      - main  # Triggers the deployment when code is pushed to main
+      - main
 
-env:
-  PROJECT_ID: 'gcp-cloudrun-gke' # TODO: update to your Google Cloud project ID
-  REGION: 'us-central1' # TODO: update to your region
-  SERVICE: 'cloud-app-service' # TODO: update to your service name
+permissions:
+  contents: read
+  id-token: write # Mandatory for OIDC federation
 
 jobs:
-  deploy:
+  gcp-auth-example:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
     steps:
-      - name: 'Checkout'
-        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      # Configure Workload Identity Federation and generate an access token.
-      #
-      # See https://github.com/google-github-actions/auth for more options,
-      # including authenticating via a JSON credentials file.
-      # - id: 'auth'
-      #   name: 'Authenticate to Google Cloud'
-      #   uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
-      #   with:
-      #     workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: replace with your workload identity provider
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
+      # Step 2: Authenticate to GCP using Workload Identity Federation
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
         with:
-          #create_credentials_file: true
-          workload_identity_provider: 'projects/gcp-cloudrun-gke/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-          #service_account: 'SERVICE_ACCOUNT_EMAIL'
+          workload_identity_provider: 'projects/655013047629/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-actions-sa@PROJECT_ID.iam.gserviceaccount.com'
+          # Format: projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+          # workload_identity_provider: 'projects/123456789012/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          # 'projects/PROJECT-NUMBER/locations/global/workloadIdentityPools/github-wif-pool/providers/githubwif'
+          # service_account: 'github-actions-sa@PROJECT_ID.iam.gserviceaccount.com'
 
-      - name: 'Deploy to Cloud Run'
-        uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17' # google-github-actions/deploy-cloudrun@v2
-        with:
-          service: '${{ env.SERVICE }}'
-          region: '${{ env.REGION }}'
-          # NOTE: If using a different source folder, update the image name below:
-          source: './'
+      # Step 3: Test authentication using the gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-      # If required, use the Cloud Run URL output in later steps
-      - name: 'Show output'
-        run: |-
-          echo ${{ steps.deploy.outputs.url }}
+      - name: Verify Authentication
+        run: |
+          gcloud auth list
+          gcloud storage buckets list # Example GCP operation
+
 
 # name: Deploy to Cloud Run
 
@@ -60,53 +47,107 @@ jobs:
 #       - main  # Triggers the deployment when code is pushed to main
 
 # env:
-#   GCP_PROJECT_ID: 'gcp-cloudrun-gke' # Replace with your GCP Project ID
-#   GCP_REGION: 'us-central1'             # Replace with your target region
-#   ARTIFACT_REPOSITORY: 'my-registry'    # Replace with your Artifact Registry name
-#   SERVICE_NAME: 'cloud-app-service'  # Name of your Cloud Run service
-#   IMAGE_TAG: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
+#   PROJECT_ID: 'gcp-cloudrun-gke' # TODO: update to your Google Cloud project ID
+#   REGION: 'us-central1' # TODO: update to your region
+#   SERVICE: 'cloud-app-service' # TODO: update to your service name
 
 # jobs:
 #   deploy:
 #     runs-on: ubuntu-latest
 
+#     permissions:
+#       contents: 'read'
+#       id-token: 'write'
+
 #     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
+#       - name: 'Checkout'
+#         uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
 
-#     # 1. Authenticate with Google Cloud using the JSON Service Account Key
-#     - name: Google Auth
-#       id: auth
-#       uses: google-github-actions/auth@v2
-#       with:
-#         credentials_json: ${{ secrets.GCP_SA_KEY }}
+#       # Configure Workload Identity Federation and generate an access token.
+#       #
+#       # See https://github.com/google-github-actions/auth for more options,
+#       # including authenticating via a JSON credentials file.
+#       # - id: 'auth'
+#       #   name: 'Authenticate to Google Cloud'
+#       #   uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
+#       #   with:
+#       #     workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider' # TODO: replace with your workload identity provider
+#       - id: 'auth'
+#         name: 'Authenticate to Google Cloud'
+#         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
+#         with:
+#           #create_credentials_file: true
+#           workload_identity_provider: 'projects/gcp-cloudrun-gke/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+#           #service_account: 'SERVICE_ACCOUNT_EMAIL'
 
-#     # # 2. Configure Docker authentication for Artifact Registry
-#     # - name: Docker Auth
-#     #   uses: docker/login-action@v3
-#     #   with:
-#     #     registry: ${{ env.GCP_REGION }}-docker.pkg.dev
-#     #     username: _json_key
-#     #     password: ${{ secrets.GCP_SA_KEY }}
+#       - name: 'Deploy to Cloud Run'
+#         uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17' # google-github-actions/deploy-cloudrun@v2
+#         with:
+#           service: '${{ env.SERVICE }}'
+#           region: '${{ env.REGION }}'
+#           # NOTE: If using a different source folder, update the image name below:
+#           source: './'
 
-#     # # 3. Build and Push the Docker Container
-#     # - name: Build and Push Container
-#     #   run: |
-#     #     IMAGE_TAG="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-#     #     docker build -t $IMAGE_TAG .
-#     #     docker push $IMAGE_TAG
-#     #     echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+#       # If required, use the Cloud Run URL output in later steps
+#       - name: 'Show output'
+#         run: |-
+#           echo ${{ steps.deploy.outputs.url }}
 
-#     # 4. Deploy the image to Google Cloud Run
-#     - name: Deploy to Cloud Run
-#       id: deploy
-#       uses: google-github-actions/deploy-cloudrun@v2
-#       with:
-#         service: ${{ env.SERVICE_NAME }}
-#         region: ${{ env.GCP_REGION }}
-#         image: ${{ env.IMAGE_TAG }}
-#         flags: '--allow-unauthenticated' # Removes public access restriction (Optional)
+# # name: Deploy to Cloud Run
 
-#     # 5. Output the deployed service URL
-#     - name: Show URL
-#       run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
+# # on:
+# #   push:
+# #     branches:
+# #       - main  # Triggers the deployment when code is pushed to main
+
+# # env:
+# #   GCP_PROJECT_ID: 'gcp-cloudrun-gke' # Replace with your GCP Project ID
+# #   GCP_REGION: 'us-central1'             # Replace with your target region
+# #   ARTIFACT_REPOSITORY: 'my-registry'    # Replace with your Artifact Registry name
+# #   SERVICE_NAME: 'cloud-app-service'  # Name of your Cloud Run service
+# #   IMAGE_TAG: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
+
+# # jobs:
+# #   deploy:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #     - name: Checkout code
+# #       uses: actions/checkout@v4
+
+# #     # 1. Authenticate with Google Cloud using the JSON Service Account Key
+# #     - name: Google Auth
+# #       id: auth
+# #       uses: google-github-actions/auth@v2
+# #       with:
+# #         credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+# #     # # 2. Configure Docker authentication for Artifact Registry
+# #     # - name: Docker Auth
+# #     #   uses: docker/login-action@v3
+# #     #   with:
+# #     #     registry: ${{ env.GCP_REGION }}-docker.pkg.dev
+# #     #     username: _json_key
+# #     #     password: ${{ secrets.GCP_SA_KEY }}
+
+# #     # # 3. Build and Push the Docker Container
+# #     # - name: Build and Push Container
+# #     #   run: |
+# #     #     IMAGE_TAG="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+# #     #     docker build -t $IMAGE_TAG .
+# #     #     docker push $IMAGE_TAG
+# #     #     echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+# #     # 4. Deploy the image to Google Cloud Run
+# #     - name: Deploy to Cloud Run
+# #       id: deploy
+# #       uses: google-github-actions/deploy-cloudrun@v2
+# #       with:
+# #         service: ${{ env.SERVICE_NAME }}
+# #         region: ${{ env.GCP_REGION }}
+# #         image: ${{ env.IMAGE_TAG }}
+# #         flags: '--allow-unauthenticated' # Removes public access restriction (Optional)
+
+# #     # 5. Output the deployed service URL
+# #     - name: Show URL
+# #       run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
