@@ -1,12 +1,12 @@
 # .github/workflows/deploy.yml
 name: Deploy to GCP
 
-on:
-  workflow_dispatch:
 # on:
-#   push:
-#     branches:
-#       - main
+#   workflow_dispatch:
+on:
+  push:
+    branches:
+      - main
 
 # Required for OIDC token generation
 permissions:
@@ -34,6 +34,7 @@ jobs:
         with:
           service: 'hello-cloud-run'
           image: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
+          flags: '--allow-unauthenticated' 
 
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
