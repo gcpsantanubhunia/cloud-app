@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-app
+  template:
+    metadata:
+      labels:
+        app: cloud-app
+    spec:
+      containers:
+      - name: cloud-app-container
+        image: gcr.io/gcp-cloudrun-gke/cloud-app:v1
+        #image: gcpsantanubhunia/cloud-app:v4
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-app-service
+spec:
+  type: LoadBalancer # Use LoadBalancer if exposing directly to the internet on Cloud providers
+  selector:
+    app: cloud-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
