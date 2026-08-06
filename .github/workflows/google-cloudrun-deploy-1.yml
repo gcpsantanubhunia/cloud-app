@@ -28,8 +28,8 @@ jobs:
       id: auth
       uses: google-github-actions/auth@v2
       with:
-        workload_identity_provider: "projects/655013047629/locations/global/workloadIdentityPools/github-pool-2/providers/github-provider-2"
-        service_account: "github-deployer@$gcp-cloudrun-gke.iam.gserviceaccount.com"
+        workload_identity_provider: "projects/655013047629/locations/global/workloadIdentityPools/githubpool/providers/githubprovider"
+        service_account: "github-actions-sa@gcp-cloudrun-gke.iam.gserviceaccount.com"
 
     # # Log in to Artifact Registry using short-lived WIF credentials
     # - name: Docker Auth
