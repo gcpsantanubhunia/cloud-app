@@ -30,9 +30,8 @@ jobs:
       - id: 'deploy'
         uses: 'google-github-actions/deploy-cloudrun@v3'
         with:
-          service: 'hello-cloud-run'
+          service: 'cloud-app-run'
           image: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
 
       - name: 'Use output'
         run: 'curl "${{ steps.deploy.outputs.url }}"'
-        
