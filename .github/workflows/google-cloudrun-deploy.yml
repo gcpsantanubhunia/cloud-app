@@ -2,9 +2,11 @@
 name: Deploy to GCP
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
 
 # Required for OIDC token generation
 permissions:

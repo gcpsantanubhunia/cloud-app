@@ -1,0 +1,37 @@
+# .github/workflows/deploy.yml
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+# Required for OIDC token generation
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Authenticate to GCP using Workload Identity Federation
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: "projects/655013047629/locations/global/workloadIdentityPools/github-pool-1/providers/github-provider-1"
+          service_account: "github-actions-sa-1@gcp-cloudrun-gke.iam.gserviceaccount.com"
+
+      - id: 'deploy'
+        uses: 'google-github-actions/deploy-cloudrun@v3'
+        with:
+          service: 'hello-cloud-run'
+          image: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
+
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
