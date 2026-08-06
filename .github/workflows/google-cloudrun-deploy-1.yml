@@ -8,7 +8,7 @@ on:
 env:
   REGION: us-central1
   SERVICE_NAME: cloud-run-service
-  REPO_NAME: cloud-run-repo
+  REPO_NAME: cloud-run-repo-1
 
 jobs:
   deploy:
