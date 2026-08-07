@@ -1,0 +1,52 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+# on:
+#   workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write 
+env:
+  SERVICE: "cloud-run-service"
+  PROJECT_ID: "cloud-app-net"
+  REGION: "us-central1"
+  IMAGE: cloud-app  
+  CLUSTER_NAME: my-gke-cluster # Update to your GKE cluster name
+  CLUSTER_ZONE: us-central1 # Update to your GKE cluster zone/region
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+      # Authenticate to GCP using Workload Identity Federation
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: "projects/149074426396/locations/global/workloadIdentityPools/githubpool/providers/githubprovider"
+        service_account: "github-actions-sa@cloud-app-net.iam.gserviceaccount.com"
+
+    # Get GKE credentials to configure kubectl context
+    - name: Set up GKE Credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.CLUSTER_NAME }}
+        location: ${{ env.CLUSTER_ZONE }}
+
+    # Update manifest placeholders and deploy to Kubernetes cluster
+    - name: Deploy to GKE
+      run: |
+        # Replaces placeholder text in your deployment yaml with the newly built image tag
+        # sed -i "s|IMAGE_PLACEHOLDER|${{ env.IMAGE_NAME }}|g" deployment.yaml
+        
+        kubectl apply -f deployment.yaml
+        kubectl rollout status deployment/cloud-app-deployment
+        kubectl get all

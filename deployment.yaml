@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cloud-app-container
-        image: gcr.io/gcp-cloudrun-gke/cloud-app:v1
+        image: gcr.io/cloud-app-net/cloud-app:v1
         #image: gcpsantanubhunia/cloud-app:v4
         ports:
         - containerPort: 8080
