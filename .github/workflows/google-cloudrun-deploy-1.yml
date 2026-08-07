@@ -15,7 +15,7 @@ env:
   PROJECT_ID: "cloud-app-net"
   REGION: "us-central1"
   IMAGE: cloud-app  
-
+  # IMAGE_TAG="$gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
     # Submit build to Cloud Build (compiles & pushes image to Artifact Registry)
     - name: Submit Cloud Build
       run: |
-        IMAGE_TAG="$gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}"
+        IMAGE_TAG="gcr.io/cloud-app-net/cloud-app:v2"
         gcloud builds submit --tag "${IMAGE_TAG}" .
         echo "IMAGE_NAME=$IMAGE_TAG" >> $GITHUB_ENV
 
