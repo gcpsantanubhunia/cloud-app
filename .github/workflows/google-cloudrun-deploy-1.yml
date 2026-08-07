@@ -14,7 +14,7 @@ env:
   SERVICE_NAME: "cloud-run-service"
   PROJECT_ID: "cloud-app-net"
   REGION: "us-central1"
-  IMAGE_TAG: 'gcr.io/cloud-app-net/cloud-app:${{ github.sha }}' 
+  IMAGE: cloud-app  
 
 jobs:
   deploy:
@@ -42,7 +42,9 @@ jobs:
     # Submit build to Cloud Build (compiles & pushes image to Artifact Registry)
     - name: Submit Cloud Build
       run: |
-        gcloud builds submit --tag ${{ env:IMAGE_TAG }} .
+        IMAGE_TAG="$$gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}:${{ github.sha }}"
+        gcloud builds submit --tag "${IMAGE_TAG}" .
+        echo "IMAGE_NAME=$IMAGE_TAG" >> $GITHUB_ENV
 
 
     # Deploy the freshly built image to Cloud Run
@@ -52,7 +54,7 @@ jobs:
       with:
         service: ${{ env.SERVICE_NAME }}
         region: ${{ env.REGION }}
-        image: ${{ env.IMAGE_TAG }}
+        image: ${{ env.IMAGE_NAME }}
         # Optional parameters:
         flags: '--allow-unauthenticated --memory=512Mi'
 
