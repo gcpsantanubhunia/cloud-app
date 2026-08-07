@@ -50,6 +50,6 @@ jobs:
       with:
         service: ${{ env.SERVICE_NAME }}
         region: ${{ env.REGION }}
-        image: 'gcr.io/gcp-cloudrun-gke/cloud-app:v1'
+        image: 'gcr.io/cloud-app-net/cloud-app:v1'
         # Optional: allows unauthenticated public traffic to your Cloud Run service
         flags: '--allow-unauthenticated' 
