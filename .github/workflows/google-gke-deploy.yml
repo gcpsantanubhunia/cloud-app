@@ -50,3 +50,4 @@ jobs:
         kubectl apply -f deployment.yaml
         kubectl rollout status deployment/cloud-app-deployment
         kubectl get all
+        kubectl get svc
