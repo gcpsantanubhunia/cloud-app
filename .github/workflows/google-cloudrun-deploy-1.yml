@@ -1,12 +1,15 @@
 name: Deploy to Cloud Run
 
-# on:
-#   push:
-#     branches:
-#       - main
 on:
-  workflow_dispatch:
-  
+  push:
+    branches:
+      - main
+# on:
+#   workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write 
 env:
   REGION: us-central1
   SERVICE_NAME: cloud-run-service
@@ -15,11 +18,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    # Required permissions for WIF OIDC federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
     steps:
     - name: Checkout Code
@@ -30,8 +28,8 @@ jobs:
       id: auth
       uses: google-github-actions/auth@v2
       with:
-        workload_identity_provider: "projects/655013047629/locations/global/workloadIdentityPools/githubpool/providers/githubprovider"
-        service_account: "github-actions-sa@gcp-cloudrun-gke.iam.gserviceaccount.com"
+        workload_identity_provider: "projects/149074426396/locations/global/workloadIdentityPools/githubpool/providers/githubprovider"
+        service_account: "github-actions-sa@cloud-app-net.iam.gserviceaccount.com"
 
     # # Log in to Artifact Registry using short-lived WIF credentials
     # - name: Docker Auth
